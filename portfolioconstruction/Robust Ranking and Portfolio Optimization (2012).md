@@ -1,7 +1,3 @@
-# Robust Ranking and Portfolio Optimization (2012)
-
-Source: [Local original PDF](</Users/gappy/Library/CloudStorage/GoogleDrive-paleologo@gmail.com/My Drive/library/Finance/PortfolioRankingRobustMVO_NguyenLo_2012.pdf>). The discussion below follows this library copy; section and exhibit references refer to the source.
-
 # 1. Metadata
 
 - **Title:** Robust Ranking and Portfolio Optimization
@@ -73,7 +69,7 @@ The method is robust optimization with cutting planes. Nguyen and Lo formulate r
    - $\mathcal P(x)$ is polyhedral, and
    - $f(x,R)$ is separable,
 
-   and $f(x,R)$ is linear in $x$, then the robust ranking problem is polynomial-time solvable via the ellipsoid method, because the separation oracle is polynomial-time. In practice the authors use the much simpler constraint-generation algorithm rather than ellipsoid, but the complexity result clarifies that the model is not intractable by construction.
+   then the robust ranking problem is polynomial-time solvable via the ellipsoid method, because the separation oracle is polynomial-time. In practice the authors use the much simpler constraint-generation algorithm rather than ellipsoid, but the complexity result clarifies that the model is not intractable by construction.
 
 5. **Non-uniform uncertainty sets**
 
@@ -122,40 +118,3 @@ The method is robust optimization with cutting planes. Nguyen and Lo formulate r
 - The computational guarantees depend on separability of $f(x,R)$ in the ranks. If the objective couples ranks in a more complex way, the network-flow reduction fails.
 - The model is robust to ranking error, not to all forms of return-model misspecification. It deliberately discards cardinal mean information.
 - The paper’s true novelty is the assignment/network-flow representation of worst-case ranking generation inside a robust portfolio problem.
-
-# 6. The uncertainty set is a constrained assignment, not independent intervals
-
-The set is $\{R\in\mathcal P(1,\ldots,n):R_i\in Q_i\}$, where $Q_i$ contains the ranks permitted for asset $i$. Even when each $Q_i$ is an interval, asset ranks cannot be selected independently: every rank must be used exactly once. Assigning every asset its worst individual rank generally creates an impossible ranking.
-
-For fixed $x$, solve
-$$
-\min_z\sum_{i,j}g_i(x,j)z_{ij},\quad
-\sum_jz_{ij}=1,\quad\sum_iz_{ij}=1,\quad z_{ij}\geq0,
-$$
-with prohibited assignments removed. Integrality of the bipartite assignment polytope gives an integral optimum without requiring a general-purpose mixed-integer solver. Feasibility should be checked: nonempty $Q_i$ for each asset does not guarantee a complete matching. The source also extends the flow construction to grouped ranks by changing rank-node capacities.
-
-Separability is in **the uncertain ranks**, so $g_i$ may depend on the whole decision vector $x$, not only $x_i$. Polynomial solvability of the entire robust problem additionally requires an appropriate tractable master. In the source's Proposition 3, $f$ must be linear in $x$ and $\mathcal P(x)$ polyhedral. A separable rank oracle alone does not make arbitrary nonconvex portfolio constraints tractable.
-
-The master gives an upper bound $d_k$ on the maximin objective, while the oracle at $x_k$ gives the feasible policy's true worst-case value $\ell_k$. A robust numerical stopping test is $d_k-\ell_k\leq\varepsilon$. Reappearance of a stored worst-case ranking is sufficient for exact termination. With ties, a new but equally binding ranking can exist at an optimum, so literal membership is not a necessary condition independent of the oracle's tie-breaking. The objective-gap test expresses the actual certificate more reliably than checking scenario identities.
-
-# 7. Portfolio objectives and conservatism
-
-Model I maximizes the worst weighted rank subject to portfolio normalization and position restrictions. Model II bounds $x^\top\Sigma x$ and maximizes the same rank reward. Its homogeneous reformulation resembles a maximum-Sharpe problem. The numerator is a **rank score**, however, not a forecast in return units. A monotone rank-to-return mapping is an additional assumption, and rescaling such a mapping affects economic interpretation even when rank ordering is unchanged.
-
-The penalty $c\|R-\bar R\|_1$ enters with a positive sign in the adversary's minimization. Larger $c$ makes distant rankings less attractive to the adversary and generally reduces conservatism relative to the nominal ranking. It is not a penalty on the investor's own weight turnover. The source suggests cross-validation for this parameter. Only validation using information available at the decision date can support a deployable rule.
-
-The covariance matrix remains an estimated input in Model II. Robustifying rank uncertainty does not protect against its estimation error, liquidity shocks or misspecified risk factors. Additional constraints can be added to the master while preserving the ranking oracle, provided the master remains solvable.
-
-# 8. Computational and empirical results
-
-The 100-asset, rank-width-20 example requires 264 generated rankings, despite a crude combinatorial count on the order of $20^{100}$. Reported total runtime is 1,360 seconds on the specified 2.67 GHz Xeon machine using Matlab, SeDuMi and Matlog. Average oracle time is $0.88$ seconds and average master time $4.27$ seconds. These measurements support practicality for that formulation and hardware; the worst-case polynomial statement belongs to the ellipsoid/separation argument, not to a proven polynomial iteration bound for this simple cut-generation implementation.
-
-The empirical sample contains **14 selected DJIA stocks**, from 2000–2007, after exclusions for earnings calendars, missing information and corporate changes. Earnings data come from IBES and stock returns from CRSP. Nominal ranks use standardized earnings surprises; positions are formed after quarterly announcements and held for the subsequent quarter. The restricted and retrospectively filtered universe limits generalization and makes point-in-time membership and corporate-action handling important for replication.
-
-Table 3 reports Model I's nonrobust mean return $-4.75\%$, volatility $28.59\%$ and Sharpe $-0.1661$. Rank uncertainty of one position gives $3.52\%,21.62\%,0.1630$; two positions give $9.06\%,17.44\%,0.5194$. Model II's nonrobust figures are $22.21\%,33.90\%,0.6553$; its two-position robust version gives $22.27\%,33.05\%,0.6739$. Risk falls across reported robust variants, while changes in mean and Sharpe are not monotone or uniformly large.
-
-Table 4 deliberately moves the uncertainty set toward or away from **future realized ranks** to illustrate information quality. Its “good information” Sharpe $1.0224$ and “bad information” Sharpe $0.3459$ are sensitivity experiments, not feasible real-time enhancements to the baseline $0.6512$. They demonstrate that robust optimization cannot rescue a badly centered uncertainty set.
-
-# 9. Reproduction priorities
-
-Preserve the rank orientation consistently, build feasible rank sets, check assignment feasibility, and retain the oracle's adverse scenarios for audit. Record master/oracle gaps and solver tolerances. Reconstruct earnings announcement timestamps and available consensus estimates before building quarterly signals; avoid confusing fiscal-quarter labels with information-release dates. Finally compare turnover, gross exposure, financing and trading costs alongside reported mean and volatility. The contribution is a tractable treatment of uncertain ordinal information; profitability depends on whether that information and its uncertainty sets are useful in the actual investable universe.

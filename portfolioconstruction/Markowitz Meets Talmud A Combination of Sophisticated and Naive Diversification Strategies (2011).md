@@ -1,11 +1,7 @@
-# Markowitz Meets Talmud A Combination of Sophisticated and Naive Diversification Strategies (2011)
-
-Source: [Local original PDF](</Users/gappy/Library/CloudStorage/GoogleDrive-paleologo@gmail.com/My Drive/library/Finance/PortfolioConstruction_TuZhou_2011.pdf>). The discussion below follows this library copy; section and exhibit references refer to the source.
-
 ## 1. Metadata
 
 - **Title:** Markowitz Meets Talmud: A Combination of Sophisticated and Naive Diversification Strategies
-- **Author(s):** Jun Tu and Guofu Zhou
+- **Author(s):** Jim Tu and Guofu Zhou
 - **Year:** 2011
 - **Journal/Venue:** *Journal of Financial Economics*
 
@@ -63,7 +59,7 @@ where $w_e$ is the naive equal-weight portfolio and $w$ is a sophisticated rule.
 
    For the Markowitz/ML case, the paper shows
    $$
-   L(w^*,w_c)=\frac{\gamma}{2}[(1-\delta)^2\pi_1+\delta^2\pi_2],
+   L(w^*,w_c)=(1-\delta)^2\pi_1+\delta^2\pi_2,
    $$
    where
    $$
@@ -177,43 +173,3 @@ where $w_e$ is the naive equal-weight portfolio and $w$ is a sophisticated rule.
 The method applies when the investor uses Markowitz-type portfolio rules in finite samples and wants a disciplined way to regularize them. It is especially useful when the sophisticated rule is sensitive to estimation error, the asset dimension is moderate relative to sample size, and the equal-weight rule is feasible.
 
 Its limits come from the assumptions used to derive the coefficients: IID normal returns, mean-variance utility, and finite-sample moment formulas. If the sophisticated rule is heavily constrained, benchmark-relative, or nonlinear, the exact $\delta$ formulas need not apply. The $1/N$ rule is also only a sensible target when the investable universe is relatively homogeneous; if assets differ radically in risk, liquidity, or mandate relevance, equal weighting may be a poor anchor even if it is low variance.
-
-## 6. Exact loss geometry and why feasible combinations have weaker guarantees
-
-For $U(w)=w^\top\mu-\gamma w^\top\Sigma w/2$, completing the square gives
-$$
-U(w^*)-U(w)=\frac\gamma2(w-w^*)^\top\Sigma(w-w^*).
-$$
-The loss expressions above omit this common positive $\gamma/2$ factor when defining the $\pi$ quantities as squared distances. It does not affect the optimal combination coefficient. Unbiasedness is essential to eliminating the cross term in the simple Markowitz combination.
-
-For a general estimated rule $\widehat w$, define $A=\|w_e-w^*\|_\Sigma^2$, $B=E\|\widehat w-w^*\|_\Sigma^2$, and $C=(w_e-w^*)^\top\Sigma E[\widehat w-w^*]$. Then
-$$
-\frac2\gamma L(\delta)=(1-\delta)^2A+2\delta(1-\delta)C+\delta^2B,
-\quad
-\delta_{\rm unc}^*=\frac{A-C}{A+B-2C}.
-$$
-The constrained coefficient is its projection onto $[0,1]$ when the denominator is positive. Only when $C=0$ does this reduce to $A/(A+B)$. The Kan–Zhou, Jorion and MacKinlay–Pastor extensions must handle their bias cross terms; a generic arbitrary rule need not have an interior combination dominating both endpoints.
-
-For the ML covariance convention $\widehat\Sigma=T^{-1}\sum_t(R_t-\widehat\mu)(R_t-\widehat\mu)^\top$, the unbiased risky-weight estimator is
-$$
-\widehat w=\frac{T-N-2}{\gamma T}\widehat\Sigma^{-1}\widehat\mu.
-$$
-This convention matters: using an unbiased covariance with divisor $T-1$ and the same scaling introduces another finite-sample error. The condition $T>N+4$ ensures the required second inverse-Wishart moment exists; invertibility alone is weaker.
-
-The weights describe risky allocations plus a residual risk-free holding. Their sum need not be one. Renormalizing the sophisticated risky weights to sum to one produces a different estimator and invalidates these utility-loss formulas. Equal weighting has zero *estimation variance* because it is fixed; it still has market risk and turnover when maintained through time.
-
-## 7. What the reported experiments actually show
-
-The simulations use 10,000 samples, often with 25 assets, investor risk aversion three, one- or three-factor return models, and different sample lengths. In the three-factor experiment with annual pricing errors evenly spanning $-2\%$ to $2\%$ and 120 observations, annual utility percentages for ML, Jorion, MacKinlay–Pastor and Kan–Zhou are $-81.09,-7.85,1.78,1.61$. Their estimated combinations yield $3.84,5.79,1.86,5.09$, versus $3.85$ for equal weighting. Thus the combination benefit is substantial, but two combinations still do not beat equal weighting in that example.
-
-Table 5 isolates coefficient estimation. At $T=120$, the ML oracle coefficient is $15.74\%$, while its estimated average is $20.56\%$. The MacKinlay–Pastor oracle coefficient is $28.50\%$, while the jackknife estimate averages $97.02\%$. This discrepancy explains the weak improvement from that estimated combination and motivates the separately considered 50/50 combination. Estimating one coefficient can still be difficult; dimensional reduction is not a guarantee of negligible estimation error.
-
-The real-data analysis uses seven asset sets and rolling windows of 120 or 240 months, applying each month's estimated portfolio to the next month. It reports annualized certainty equivalents at risk aversion three. With 120 months in the 11-asset industry set, equal weighting delivers $3.66\%$, while ML is $-38.18\%$; the Jorion, MacKinlay–Pastor and Kan–Zhou combinations give $3.15\%,2.21\%,3.02\%$. Equal weighting remains difficult to beat in this and the international set. In the 28-asset Fama–French-plus-factors set, the Kan–Zhou combination gives $19.36\%$ versus $5.51\%$ for equal weighting. Results therefore vary materially with opportunity set.
-
-The full-sample ML benchmark in Table 6 is explicitly infeasible for contemporaneous trading and is included to illustrate estimation loss. It must not be counted as an implementable out-of-sample strategy. Certainty equivalents are utility statistics, not compounded returns or guaranteed yields. The paper's comparisons also do not supply a universal net-of-cost dominance result.
-
-## 8. Implementation implications
-
-Use a consistent excess-return frequency, covariance divisor and risk-aversion scale; compute the rule-specific coefficient estimator; impose the intended $[0,1]$ restriction; and carry the residual cash exposure explicitly. Validate the complete rolling procedure, including coefficient estimation, rather than selecting the best mixture using future returns. Report utility, Sharpe ratio, turnover and leverage separately: optimizing expected utility with parameter uncertainty is not identical to maximizing expected realized Sharpe ratio.
-
-The main lesson is a decision-theoretic decomposition of error, not a universal endorsement of equal weights. Another fixed, economically justified anchor can enter the same geometry, but a data-dependent anchor introduces covariance between estimation errors. That covariance must be included rather than borrowing the paper's zero-cross-term proof.
